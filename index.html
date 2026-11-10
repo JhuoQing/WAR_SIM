@@ -3,90 +3,93 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>海峽戰術 WAR_SIM</title>
+<title>海峽戰術 WAR_SIM v0.2</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header>
-  <h1>海峽戰術 <small>回合制六角格戰術・初版 v0.1</small></h1>
-  <div id="status"></div>
+  <div class="brand">海峽戰術 <small>WAR_SIM v0.2・部署階段</small></div>
+  <div class="hdr-right">
+    <span id="deployTimer"></span>
+  </div>
 </header>
+<div class="ticker"><span class="tag">情報快訊</span><div class="track"><span id="tickerText"></span></div></div>
 
 <main>
   <div id="board">
     <canvas id="cv"></canvas>
-
-    <div id="overlay-menu" class="overlay">
-      <div class="card">
-        <h2>海峽戰術</h2>
-        <p class="sub">空拍視角・部署倒數・回合制六角格</p>
-        <ul class="rules">
-          <li><b class="red">攻方（紅）</b>：渡海登陸，佔領 3 個據點。任一回合結束時佔滿 3 個立即獲勝；第 12 回合結束時佔有 2 個以上也獲勝。</li>
-          <li><b class="blue">守方（藍）</b>：守住據點，或殲滅全部攻方部隊。</li>
-          <li>在海上的陸軍是「搭載中」：移動 3 格、<b>不能攻擊</b>、防禦降低，只能從<b>海灘</b>登陸。</li>
-          <li>反艦飛彈對海上目標傷害極高；砲兵移動後不能射擊、不能打相鄰格。</li>
-          <li>走進敵軍相鄰格會停下（控制區）。被攻擊且射程夠時會反擊。</li>
-        </ul>
-        <label class="chk"><input type="checkbox" id="optTimer" checked> 戰鬥回合限時 60 秒</label>
-        <div class="row">
-          <button class="side blue-btn" data-side="TW">扮演守方（藍）</button>
-          <button class="side red-btn" data-side="PRC">扮演攻方（紅）</button>
-        </div>
-      </div>
+    <div id="tooltip" class="hidden"></div>
+    <div id="toast" class="hidden"></div>
+    <div class="mapctl">
+      <button id="zIn" title="放大">＋</button>
+      <button id="zOut" title="縮小">－</button>
+      <button id="zReset" title="重置視角">⟲</button>
+      <label><input type="checkbox" id="optRanges" checked> 顯示射程</label>
+      <label><input type="checkbox" id="optLabels" checked> 地名</label>
     </div>
-
-    <div id="overlay-count" class="overlay hidden"><div id="countNum">3</div></div>
-
-    <div id="overlay-result" class="overlay hidden">
-      <div class="card">
-        <h2 id="resultTitle"></h2>
-        <p id="resultText"></p>
-        <button id="btnAgain" class="primary">再玩一次</button>
-      </div>
+    <div class="legend">
+      <span><i class="lg beach"></i>灘頭</span>
+      <span><i class="lg base"></i>空軍基地</span>
+      <span><i class="lg enemy"></i>敵方集結區</span>
+      <span><i class="lg line"></i>我方海域界線（遊戲設定）</span>
     </div>
+    <div id="overlay" class="overlay hidden"><div class="card" id="overlayCard"></div></div>
   </div>
 
   <aside>
     <section>
-      <div id="phase">—</div>
-      <div id="timerWrap"><div id="timerBar"></div></div>
-      <div id="timerText"></div>
+      <div class="row2">
+        <label>難度 <select id="selDiff"></select></label>
+        <label>部署時限 <select id="selTimer">
+          <option value="0">不限時</option><option value="300">5 分鐘</option><option value="600">10 分鐘</option>
+        </select></label>
+      </div>
     </section>
 
-    <section id="deployBox" class="hidden">
-      <h3>部署 <span id="budget"></span></h3>
+    <section>
+      <h3>國防預算 <span id="budgetText"></span></h3>
+      <div class="bbar" id="budgetBar"></div>
+      <div class="blegend" id="budgetLegend"></div>
+    </section>
+
+    <section>
+      <div class="tabs" id="tabs"></div>
       <div id="shop"></div>
+      <p class="hint">點兵種 → 點地圖放置（可放的區域會發光）。拖曳單位可移動，右鍵單位撤回退款，Esc 取消。</p>
+    </section>
+
+    <section>
+      <h3>日美協防預備金 <span class="tagv">虛構設定</span></h3>
+      <div id="ally"></div>
+    </section>
+
+    <section>
+      <h3>部署評估</h3>
+      <div id="eval"></div>
+    </section>
+
+    <section>
+      <h3>情報估計（敵方）</h3>
+      <div id="intel"></div>
+    </section>
+
+    <section>
       <div class="row">
-        <button id="btnAuto">自動部署</button>
+        <button id="btnAuto">推薦部署</button>
         <button id="btnClear">清空</button>
       </div>
-      <button id="btnReady" class="primary">部署完成</button>
-      <p class="hint">點兵種 → 點地圖發光區放置；點自己的單位可撤回退款。</p>
-    </section>
-
-    <section id="battleBox" class="hidden">
-      <button id="btnEnd" class="primary">結束回合</button>
-      <p class="hint">點自己的單位：綠格可移動、紅圈可攻擊。每單位每回合可移動一次、攻擊一次（攻擊後不能再移動）。</p>
-    </section>
-
-    <section>
-      <h3>資訊</h3>
-      <div id="info">滑鼠移到格子上查看</div>
-    </section>
-
-    <section>
-      <h3>目標據點</h3>
-      <div id="objs"></div>
-    </section>
-
-    <section class="logSec">
-      <h3>戰報</h3>
-      <div id="log"></div>
+      <div class="row">
+        <button id="btnSave">儲存</button>
+        <button id="btnLoad">載入</button>
+      </div>
+      <button id="btnWar" class="war">戰爭開始</button>
     </section>
   </aside>
 </main>
+<footer>本遊戲為虛構戰術遊戲，單位數值與協防機制皆為遊戲設定，不代表真實戰力、政策或任何情勢預測。地圖：<span id="mapSource"></span></footer>
 
-<footer>本遊戲為虛構戰術遊戲，單位數值僅為遊戲平衡設計，不代表真實戰力，也不是任何情勢預測。</footer>
-<script src="game.js"></script>
+<script src="data/map-data.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
