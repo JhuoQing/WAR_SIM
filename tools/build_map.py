@@ -1,6 +1,6 @@
 import json, math, sys
 NE, TW, OUT = sys.argv[1], sys.argv[2], sys.argv[3]
-BBOX = (116.8, 21.3, 123.6, 27.6)  # lon0, lat0, lon1, lat1
+BBOX = (112.5, 19.0, 126.5, 30.5)  # lon0, lat0, lon1, lat1
 
 def clip(ring):
     def clip_edge(pts, inside, inter):
@@ -56,10 +56,11 @@ def process(geom, tol, min_area):
     return out
 
 ne = json.load(open(NE))
-china = []
+china, other = [], []
 for f in ne['features']:
-    if f['properties'].get('ADMIN') == 'China':
-        china += process(f['geometry'], 0.004, 2e-4)
+    a = f['properties'].get('ADMIN')
+    if a == 'China': china += process(f['geometry'], 0.005, 2e-4)
+    elif a in ('Japan', 'Philippines'): other += process(f['geometry'], 0.004, 5e-5)
 
 ZONE = {'台北市':'taipei','新北市':'taipei','基隆市':'taipei','桃園縣':'taoyuan','新竹縣':'hsinchu','新竹市':'hsinchu',
   '苗栗縣':'miaoli','台中市':'taichung','彰化縣':'changhua','南投縣':'nantou','雲林縣':'yunlin','嘉義縣':'chiayi','嘉義市':'chiayi',
@@ -81,7 +82,7 @@ for c in counties:
         s=cent.setdefault(c['zone'],[0,0,0]); s[0]+=cx*a; s[1]+=cy*a; s[2]+=a
 centroids={z:[round(v[0]/v[2],3),round(v[1]/v[2],3)] for z,v in cent.items()}
 
-data={'bbox':BBOX,'china':china,'counties':counties,'centroids':centroids,
+data={'bbox':BBOX,'china':china,'other':other,'counties':counties,'centroids':centroids,
       'source':'Natural Earth（公共領域）；台灣縣市界：g0v twgeojson（內政部開放資料）'}
 s=json.dumps(data,ensure_ascii=False,separators=(',',':'))
 open(OUT,'w',encoding='utf-8').write('// 自動產生：tools/build_map.py\nwindow.MAP_DATA='+s+';\n')

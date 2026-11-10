@@ -3,27 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>海峽戰術 WAR_SIM v0.2</title>
+<title>海峽戰術 WAR_SIM v0.3</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header>
-  <div class="brand">海峽戰術 <small>WAR_SIM v0.2・部署階段</small></div>
+  <div class="brand">海峽戰術 <small id="modeLabel">WAR_SIM v0.3・部署階段</small></div>
   <div class="hdr-right">
     <span id="deployTimer"></span>
+    <button id="btnTheme" title="切換深色／淺色">☀️ 淺色</button>
   </div>
 </header>
-<div class="ticker"><span class="tag">情報快訊</span><div class="track"><span id="tickerText"></span></div></div>
+<div class="ticker" id="ticker"><span class="tag" id="tickerTag">情報快訊</span><div class="track"><span id="tickerText"></span></div></div>
 
 <main>
   <div id="board">
     <canvas id="cv"></canvas>
+    <div id="banner" class="hidden"></div>
     <div id="tooltip" class="hidden"></div>
     <div id="toast" class="hidden"></div>
+    <button id="zReset" class="reset">⟲ 重置視角</button>
     <div class="mapctl">
       <button id="zIn" title="放大">＋</button>
       <button id="zOut" title="縮小">－</button>
-      <button id="zReset" title="重置視角">⟲</button>
       <label><input type="checkbox" id="optRanges" checked> 顯示射程</label>
       <label><input type="checkbox" id="optLabels" checked> 地名</label>
     </div>
@@ -34,10 +36,12 @@
       <span><i class="lg line"></i>我方海域界線（遊戲設定）</span>
     </div>
     <div id="overlay" class="overlay hidden"><div class="card" id="overlayCard"></div></div>
+    <div id="countdown" class="overlay hidden"><div id="countNum">3</div></div>
   </div>
 
   <aside>
-    <section>
+    <!-- 部署階段 -->
+    <section class="deploy-only">
       <div class="row2">
         <label>難度 <select id="selDiff"></select></label>
         <label>部署時限 <select id="selTimer">
@@ -45,44 +49,56 @@
         </select></label>
       </div>
     </section>
-
-    <section>
+    <section class="deploy-only">
       <h3>國防預算 <span id="budgetText"></span></h3>
       <div class="bbar" id="budgetBar"></div>
       <div class="blegend" id="budgetLegend"></div>
     </section>
-
-    <section>
+    <section class="deploy-only">
       <div class="tabs" id="tabs"></div>
       <div id="shop"></div>
       <p class="hint">點兵種 → 點地圖放置（可放的區域會發光）。拖曳單位可移動，右鍵單位撤回退款，Esc 取消。</p>
     </section>
-
-    <section>
+    <section class="deploy-only">
       <h3>日美協防預備金 <span class="tagv">虛構設定</span></h3>
       <div id="ally"></div>
     </section>
-
-    <section>
+    <section class="deploy-only">
       <h3>部署評估</h3>
       <div id="eval"></div>
     </section>
-
-    <section>
+    <section class="deploy-only">
       <h3>情報估計（敵方）</h3>
       <div id="intel"></div>
     </section>
-
-    <section>
-      <div class="row">
-        <button id="btnAuto">推薦部署</button>
-        <button id="btnClear">清空</button>
-      </div>
-      <div class="row">
-        <button id="btnSave">儲存</button>
-        <button id="btnLoad">載入</button>
-      </div>
+    <section class="deploy-only">
+      <div class="row"><button id="btnAuto">推薦部署</button><button id="btnClear">清空</button></div>
+      <div class="row"><button id="btnSave">儲存</button><button id="btnLoad">載入</button></div>
       <button id="btnWar" class="war">戰爭開始</button>
+    </section>
+
+    <!-- 戰爭階段 -->
+    <section class="war-only">
+      <div class="clock"><span id="wClock">D+0 00:00</span><span id="wPhase"></span></div>
+      <div class="row speed">
+        <button id="btnPause">⏸ 暫停</button>
+        <button data-speed="1" class="active">1x</button>
+        <button data-speed="2">2x</button>
+        <button data-speed="4">4x</button>
+        <button id="btnSkip" title="直接算出結果">⏭</button>
+      </div>
+    </section>
+    <section class="war-only">
+      <h3>戰況儀表板</h3>
+      <div id="wMeters"></div>
+    </section>
+    <section class="war-only">
+      <h3>兵力</h3>
+      <div id="wForces"></div>
+    </section>
+    <section class="war-only logSec">
+      <h3>戰報</h3>
+      <div id="wLog"></div>
     </section>
   </aside>
 </main>
@@ -90,6 +106,8 @@
 
 <script src="data/map-data.js"></script>
 <script src="js/data.js"></script>
+<script src="js/core.js"></script>
+<script src="js/engine.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

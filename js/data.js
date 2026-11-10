@@ -30,6 +30,25 @@ const UNIT_TYPES = {
   radar:   { cat: 'ad',   name: '雷達站',     glyph: '偵', cost: 40,  place: 'land',    hp: 40,  atk: 0,  def: 10, range: 250, desc: '提早預警，提升攔截與反艦效率' },
 };
 
+// 地圖上顯示的表情符號
+const UNIT_EMOJI = {
+  inf: '🪖', armor: '🛡️', art: '💥', mlrs: '🎇', reserve: '👥',
+  frigate: '🚢', fac: '🚤', sub: '🐋', mine: '💣',
+  fighter: '✈️', drone: '🛸',
+  sam_l: '🚀', sam_s: '🎯', asm: '☄️', radar: '📡',
+};
+for (const k in UNIT_TYPES) UNIT_TYPES[k].emoji = UNIT_EMOJI[k];
+
+// 防空攔截彈數量（推演用）
+const AMMO = { sam_l: 60, sam_s: 40, frigate: 24 };
+
+// 地圖參考地名（非遊戲區域）
+const MAP_LABELS = [
+  { name: '福建', lon: 118.0, lat: 26.2 }, { name: '浙江', lon: 119.9, lat: 28.6 },
+  { name: '廣東', lon: 115.4, lat: 23.6 }, { name: '江西', lon: 115.9, lat: 27.0 },
+  { name: '日本・沖繩縣', lon: 124.2, lat: 24.0, neutral: true }, { name: '菲律賓', lon: 121.6, lat: 19.6, neutral: true },
+];
+
 const ZONE_TYPES = {
   capital:  { name: '首都都會', def: 3 },
   urban:    { name: '都會區',   def: 2 },
